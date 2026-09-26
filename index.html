@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- ==================================================================
+     EDIT ME: page metadata. The og:image should be a 1200x630 PNG so
+     the link preview looks right on Twitter/X, Slack and Bluesky.
+     ================================================================== -->
+<title>Action Jets: Learning the Local Shape of the Action-conditioned Data Manifold</title>
+<meta name="description" content="Action Jets estimate the local shape of action-conditioned data manifolds from frozen generative world models, scoring any number of candidate actions from a single network pass.">
+<meta property="og:title" content="Action Jets">
+<meta property="og:description" content="Learning the local shape of the action-conditioned data manifold.">
+<meta property="og:image" content="static/images/og_card.png">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="static/images/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/style.css">
+
+
+</head>
+
+<body>
+
+<!-- ================================================================ -->
+<!-- NAV                                                              -->
+<!-- ================================================================ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="#top">Action Jets</a>
+    <div class="nav-links">
+      <a href="#abstract">Abstract</a>
+      <a href="#method">Method</a>
+      <a href="#radius">Validity radius</a>
+      <a href="#speed">Speed</a>
+      <a href="#manifold">Manifold</a>
+      <a href="#sweeps">Sweeps</a>
+      <a href="#bibtex">BibTeX</a>
+    </div>
+  </div>
+</nav>
+
+
+<!-- ================================================================ -->
+<!-- HERO                                                             -->
+<!-- ================================================================ -->
+<header class="hero" id="top">
+  <div class="wrap">
+    <p class="venue">Under review</p>
+
+    <h1 class="title">
+      Action&nbsp;Jets<span class="title-sep">:</span>
+      <span class="subtitle">Learning the Local Shape of the<br>Action-conditioned Data Manifold</span>
+    </h1>
+
+    <ul class="authors">
+      <li><a href="#">Anton Arapin</a></li>
+      <li><a href="#">Chahyon Ku</a></li>
+      <li><a href="#">Bernadette Bucher</a></li>
+    </ul>
+
+    <p class="affil">University of Michigan</p>
+
+    <!-- ============================================================
+         EDIT ME: link buttons.
+           Paper  -> drop your PDF at static/paper/action_jets.pdf
+           arXiv  -> href is intentionally EMPTY (reloads the page).
+                     Replace href="" with your arXiv URL when posted.
+           Code   -> intentionally reloads the page, labelled
+                     "coming soon". Replace href="" with the repo URL.
+         An empty href="" resolves to the current page, i.e. a reload.
+         ============================================================ -->
+    <div class="btns">
+      <a class="btn" href="static/paper/action_jets.pdf">
+        <svg class="btn-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 1h5l3 3v11H4z" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M9 1v3h3" fill="none" stroke="currentColor" stroke-width="1.3"/></svg> Paper
+      </a>
+      <a class="btn" href="">
+        <svg class="btn-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 10.5L11 5M7 4.6h4.4V9" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><path d="M12.5 9.5v3h-9v-9h3" fill="none" stroke="currentColor" stroke-width="1.3"/></svg> arXiv
+      </a>
+      <a class="btn btn-soon" href="" title="Code release coming soon">
+        <svg class="btn-ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.6 4.4L2 8l3.6 3.6M10.4 4.4L14 8l-3.6 3.6" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Code
+        <span class="tag">coming soon</span>
+      </a>
+    </div>
+  </div>
+</header>
+
+
+<!-- ================================================================ -->
+<!-- TEASER                                                           -->
+<!-- ================================================================ -->
+<section class="wrap section section-teaser">
+  <!-- EDIT ME: teaser figure. A wide PNG, ~1600-2000 px across. -->
+  <figure class="media">
+    <img class="ph-img" src="static/images/teaser.png"
+         alt="Action Jets teaser figure">
+    <figcaption>
+      One encoder pass and one coefficient extraction per state. Every
+      candidate action after that is arithmetic on tensors already in
+      memory.
+    </figcaption>
+  </figure>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- ABSTRACT                                                         -->
+<!-- ================================================================ -->
+<section class="wrap section" id="abstract">
+  <h2>Abstract</h2>
+  <div class="prose">
+    <p>
+      World models are a powerful means of reasoning and planning for a
+      variety of applications including robotics. However, many of these
+      world models such as video generation models are high dimensional
+      and computationally expensive, which limits the number of action
+      candidates that can be evaluated by a planner. We show that this
+      cost is avoidable for planners over short horizons which only need
+      local information with respect to the current state.
+    </p>
+    <p>
+      For a fixed state, the frames reachable by varying a
+      low-dimensional action, a camera movement or an end-effector
+      command, lie on a low-dimensional manifold. We estimate the local
+      shape of that manifold directly via a network trained to estimate
+      how each image region moves per unit of each action axis,
+      supervised by data collected from samples by the generator. A
+      correction head fit to trajectory data describes the shape of this
+      manifold region up to a third-order Taylor polynomial. We call the
+      network estimating the Taylor polynomial describing the manifold
+      shape an <em>action jet</em>, and compute its radius of validity in
+      closed form.
+    </p>
+    <p>
+      By traversing this approximation of the local manifold shape, we
+      only have to perform inference once per state for any number of
+      candidate actions. We achieve over 100&times; speedup of
+      same-length trajectory rollouts compared to the source generators,
+      and this gap widens with the number of candidates a planner
+      evaluates. We measure against state-of-the-art action-conditioned
+      generators: IRASim and WorldGym on BridgeData&nbsp;V2, a real 7-DoF
+      manipulation benchmark, and DepthSplat, LagerNVS and FrameCrafter
+      on DL3DV scenes. Because only the first-order term comes from the
+      generator and the rest from the data, the action jet also predicts
+      held-out frames more accurately than IRASim, the generator that
+      supplied its tangent, at short horizons and at roughly
+      10<sup>4</sup>&times; less compute.
+    </p>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- HIGHLIGHTS                                                       -->
+<!-- ================================================================ -->
+<section class="wrap section">
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-n">1.8<span class="stat-u">ms</span></div>
+      <div class="stat-l">per candidate action, with the network run
+        twice per state no matter how many candidates are scored</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">0.80</div>
+      <div class="stat-l">tangent agreement between charts distilled
+        from two unrelated generators, against a permutation null of
+        0.00</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">99<span class="stat-u">%</span></div>
+      <div class="stat-l">of single-step robot transitions fall inside
+        the chart's own closed-form validity radius</div>
+    </div>
+    <div class="stat">
+      <div class="stat-n">+1.2<span class="stat-u">dB</span></div>
+      <div class="stat-l">over the generator that supplied the tangent,
+        at the next frame, at ~10<sup>4</sup>&times; less compute</div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- METHOD                                                           -->
+<!-- ================================================================ -->
+<section class="wrap section" id="method">
+  <h2>Charting the action-conditioned data manifold</h2>
+
+  <div class="prose">
+    <p>
+      Latent image states live in the space of a frozen image
+      autoencoder (<i>E</i>,&thinsp;<i>D</i>): <i>z</i> = <i>E</i>(<i>x</i>).
+      We split <i>z</i> into <i>N</i> tokens, each a 2&times;2 block of latent
+      pixels, so every token is a vector in
+      &#8477;<sup><i>d</i></sup>. For an image state <i>x</i>, let
+      <i>M<sub>x</sub></i> be the set of latent states reachable from
+      <i>x</i> by actions in a neighbourhood <i>U</i> of zero. This is a
+      smooth surface of dimension at most <i>A</i>, fixed by the data
+      distribution including the dynamics. It is a property of the
+      <em>dataset</em>, not of any model.
+    </p>
+    <p>
+      A generator <i>T</i> trained on that data defines
+      <i><span class="hat">&phi;</span><sub>x</sub></i>(<i>a</i>) =
+      <i>E</i>(<i>T</i>(<i>x</i>,&thinsp;<i>a</i>)), and where it has
+      learned the data,
+      <i><span class="hat">&phi;</span><sub>x</sub></i>(<i>U</i>) &asymp;
+      <i>M<sub>x</sub></i>: an approximate <em>chart</em> of the
+      action-conditioned data manifold. The local shape of
+      <i>M<sub>x</sub></i> is its Taylor expansion,
+    </p>
+
+    <div class="eq">
+      <i>&phi;<sub>x</sub></i>(<i>a</i>) =
+      <i>&phi;<sub>x</sub></i>(0)
+      + <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i</i></span></span>
+      <i>a<sub>i</sub> J<sub>i</sub></i>
+      + <span class="frac fr-s"><span class="num">1</span><span class="den">2</span></span>
+      <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i,j</i></span></span>
+      <i>a<sub>i</sub> a<sub>j</sub> H<sub>ij</sub></i>
+      + <span class="frac fr-s"><span class="num">1</span><span class="den">6</span></span>
+      <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i,j,k</i></span></span>
+      <i>a<sub>i</sub> a<sub>j</sub> a<sub>k</sub> C<sub>ijk</sub></i>
+      + &hellip;
+    </div>
+
+    <p>
+      whose first-order fields <i>J<sub>i</sub></i> =
+      &part;<i>&phi;<sub>x</sub></i>&thinsp;/&thinsp;&part;<i>a<sub>i</sub></i>
+      span the tangent space. An <em>Action Jet</em> is a network that
+      emits a truncation of that expansion from the current frame, with
+      the first order measured from a generator and everything above it
+      fit to data.
+    </p>
+  </div>
+
+  <!-- EDIT ME: the method / pipeline overview figure. -->
+  <figure class="media">
+    <img class="ph-img" src="static/images/method.png"
+         alt="Method overview">
+    <figcaption>
+      <b>Method overview.</b> Fill colour marks what supervises each
+      part: the generator's measured Jacobians, recorded transitions, or
+      no network at all. The generator is queried only once, offline.
+    </figcaption>
+  </figure>
+
+  <h3>1. Probe the generator for the action Jacobian</h3>
+  <div class="prose">
+    <p>
+      For each generator, state and axis <i>i</i> we render at
+      &plusmn;&delta;<i><sub>i</sub></i> along that axis alone, encode both
+      renders, and difference them into the field
+    </p>
+
+    <div class="eq">
+      <i><span class="hat">J</span><sub>i</sub></i> =
+      <span class="frac"><span class="num"><i>z</i><sup>+&delta;<sub>i</sub></sup> &minus; <i>z</i><sup>&minus;&delta;<sub>i</sub></sup></span><span class="den">2&delta;<i><sub>i</sub></i></span></span>
+      &nbsp;&isin;&nbsp; &#8477;<sup><i>N</i>&times;<i>d</i></sup>
+    </div>
+
+    <p>
+      <i><span class="hat">J</span><sub>i</sub></i> is the estimated
+      action Jacobian for axis <i>i</i>, and it says how each token moves
+      per unit of that axis. Both renders show the same room, table and
+      robot, and subtracting removes all of it, so the measurement
+      records the generator's <em>response</em> to the action rather
+      than the quality of its rendering. For stochastic generators we
+      average over samples. The probe needs no gradients, so any model
+      that maps a state and an action to an image can be probed,
+      including multi-step diffusion samplers.
+    </p>
+  </div>
+
+  <h3>2. Estimate the first-order term with the geometry encoder</h3>
+  <div class="prose">
+    <p>
+      Probing costs two generator passes per axis per state, which a
+      planner scoring many candidates cannot afford. We therefore train
+      a <em>geometry encoder</em> that predicts the action Jacobian from
+      the current frame in one forward pass, supervised by the probed
+      fields.
+    </p>
+    <p>
+      A ViT reads <i>z<sub>t</sub></i> and one context frame
+      <i>z</i><sub><i>t</i>&minus;1</sub> as <i>N</i> tokens. For each
+      token <i>n</i> it emits a feature vector <i>h<sub>n</sub></i>, used
+      later by the correction head, a basis <i>B<sub>n</sub></i> &isin;
+      &#8477;<sup><i>d</i>&times;<i>K</i></sup>, and coefficients
+      <i>G<sub>n</sub></i> &isin; &#8477;<sup><i>K</i>&times;<i>A</i></sup>.
+      Taking <i>Q<sub>n</sub></i> to be the <i>Q</i> factor of the reduced
+      QR decomposition of <i>B<sub>n</sub></i> makes
+      <i>Q<sub>n</sub></i><sup>&#8868;</sup><i>Q<sub>n</sub></i> =
+      <i>I<sub>K</sub></i> hold by construction, and token <i>n</i>'s
+      motion per unit of axis <i>i</i> is predicted as
+      <i>F<sub>i,n</sub></i> = <i>Q<sub>n</sub>G<sub>n</sub>e<sub>i</sub></i>.
+      All <i>A</i> axes share that one rank-<i>K</i> frame, which makes
+      the output a tangent <em>space</em> rather than a set of unrelated
+      fields. The encoder minimises
+    </p>
+
+    <div class="eq">
+      &#8466;<sub>enc</sub> =
+      <span class="sum"><span class="supl"><i>A</i></span><span class="sop">&#8721;</span><span class="slim"><i>i</i>=1</span></span>
+      <span class="frac"><span class="num">&#8214;<i>F<sub>i</sub></i> &minus; <i><span class="hat">J</span><sub>i</sub></i>&#8214;<sub>F</sub><sup>2</sup></span><span class="den">&#8214;<i><span class="hat">J</span><sub>i</sub></i>&#8214;<sub>F</sub><sup>2</sup></span></span>
+      + &lambda;<sub>cov</sub>
+      <span class="sum"><span class="supl"><i>A</i></span><span class="sop">&#8721;</span><span class="slim"><i>i</i>=1</span></span>
+      <span class="frac"><span class="num">&#8214;(<i>I</i> &minus; <i>QQ</i><sup>&#8868;</sup>)<i><span class="hat">J</span><sub>i</sub></i>&#8214;<sub>F</sub></span><span class="den">&#8214;<i><span class="hat">J</span><sub>i</sub></i>&#8214;<sub>F</sub></span></span>
+    </div>
+
+    <p>
+      where the norms are taken over all tokens and
+      (<i>I</i>&nbsp;&minus;&nbsp;<i>QQ</i><sup>&#8868;</sup>) acts
+      token-wise. Normalising each axis by its own energy keeps the axes
+      that cause large image motion from dominating the gradient; the
+      second term prices the part of each probed field that lies outside
+      the predicted frame. Stacking tokens gives the encoder's estimate
+      of <i>J<sub>i</sub></i>, and with it the first-order truncation
+    </p>
+
+    <div class="eq">
+      <i><span class="hat">&phi;</span><sub>x</sub></i><sup>(1)</sup>(<i>a</i>)
+      = <i>z<sub>t</sub></i> +
+      <span class="sum"><span class="supl"><i>A</i></span><span class="sop">&#8721;</span><span class="slim"><i>i</i>=1</span></span>
+      <i>a<sub>i</sub> F<sub>i</sub></i>
+    </div>
+  </div>
+
+  <h3>3. Fit the higher orders to the data</h3>
+  <div class="prose">
+    <p>
+      The first-order chart is a plane and <i>M<sub>x</sub></i> is a
+      curved surface. A <em>correction head</em> adds the second- and
+      third-order terms. Unlike the geometry encoder it is not
+      supervised by the generator: it is trained on recorded
+      transitions, so every term above first order is fit to the data
+      itself. For each token it reads the encoder feature
+      <i>h<sub>n</sub></i> and a noise draw <i>&epsilon;<sub>n</sub></i>
+      and emits the coefficient fields of
+    </p>
+
+    <div class="eq">
+      <i>r</i>(<i>a</i>,&thinsp;<i>&epsilon;</i>) =
+      <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i</i></span></span>
+      <i>a<sub>i</sub> L<sub>i</sub></i>
+      + <span class="frac fr-s"><span class="num">1</span><span class="den">2</span></span>
+      <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i,j</i></span></span>
+      <i>a<sub>i</sub> a<sub>j</sub> H<sub>ij</sub></i>
+      + <span class="frac fr-s"><span class="num">1</span><span class="den">6</span></span>
+      <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i,j,k</i></span></span>
+      <i>a<sub>i</sub> a<sub>j</sub> a<sub>k</sub> C<sub>ijk</sub></i>
+      + <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i</i></span></span>
+      <i>a<sub>i</sub> U</i><sup>(1)</sup><sub><i>i</i></sub>(<i>&epsilon;</i>)
+      + <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i,j</i></span></span>
+      <i>a<sub>i</sub> a<sub>j</sub> U</i><sup>(2)</sup><sub><i>ij</i></sub>(<i>&epsilon;</i>)
+    </div>
+
+    <p>
+      where every field lies in &#8477;<sup><i>N</i>&times;<i>d</i></sup>.
+      <i>H<sub>ij</sub></i> and <i>C<sub>ijk</sub></i> are the head's
+      estimates of the second- and third-order coefficients,
+      <i>L<sub>i</sub></i> corrects the first-order term, and
+      <i>U</i><sup>(1)</sup>, <i>U</i><sup>(2)</sup> are
+      noise-conditioned <em>fill</em> fields for disoccluded content,
+      which is a discontinuous function of the action and has no
+      polynomial form. The prediction for action <i>a</i> is
+    </p>
+
+    <div class="eq">
+      <i><span class="hat">z</span></i>(<i>a</i>,&thinsp;<i>&epsilon;</i>)
+      = <i><span class="hat">&phi;</span><sub>x</sub></i><sup>(1)</sup>(<i>a</i>)
+      + <i><span class="tld">r</span></i>(<i>a</i>,&thinsp;<i>&epsilon;</i>)
+      = <i>z<sub>t</sub></i>
+      + <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i</i></span></span>
+      <i>a<sub>i</sub> F<sub>i</sub></i>
+      + <i><span class="tld">r</span></i>(<i>a</i>,&thinsp;<i>&epsilon;</i>)
+    </div>
+
+    <p>
+      with <i><span class="tld">r</span></i>(<i>a</i>,&thinsp;<i>&epsilon;</i>)
+      = <i>r</i>(<i>a</i>,&thinsp;<i>&epsilon;</i>) &minus;
+      <i>r</i>(0,&thinsp;<i>&epsilon;</i>), which guarantees
+      <i><span class="hat">z</span></i>(0,&thinsp;<i>&epsilon;</i>) =
+      <i>z<sub>t</sub></i>. The head is trained with the encoder frozen.
+    </p>
+    <p>
+      Every coefficient field is computed from <i>h</i> and
+      <i>&epsilon;</i>, and <em>never</em> from <i>a</i>. That is the
+      property the whole method rests on: the fields are extracted once
+      per state, and each candidate action after that costs only a
+      contraction against tensors already in memory. It is also why an
+      action jet can be more accurate than the generator it came from.
+      The generator's contribution ends at first order, supplying the
+      directions in which the image can move at each state, including
+      along single axes the dataset never isolates. Recorded data sets
+      every coefficient above it.
+    </p>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- VALIDITY RADIUS                                                  -->
+<!-- ================================================================ -->
+<section class="wrap section" id="radius">
+  <h2>4. Query candidate futures inside the radius of validity</h2>
+
+  <div class="prose">
+    <p>
+      The estimate does not hold for actions that move the state too
+      far. A camera moved somewhere with no visual overlap with the
+      current scene cannot have its new view predicted from the old one,
+      and computationally, a Taylor polynomial stops being accurate far
+      from its expansion point. Because the prediction is an explicit
+      polynomial in <i>a</i>, that boundary can be computed from the
+      chart's own coefficients rather than found by a sweep.
+    </p>
+    <p>
+      Let <i>u</i> be a unit direction in normalised action units. The
+      predicted displacement from <i>z<sub>t</sub></i> at step length
+      <i>r</i> is exactly a cubic,
+    </p>
+
+    <div class="eq">
+      <i>P</i>(<i>r</i>) =
+      <i><span class="hat">z</span></i>(<i>ru</i>) &minus; <i>z<sub>t</sub></i>
+      = <i>&alpha;r</i> + <i>&beta;r</i><sup>2</sup> + <i>&gamma;r</i><sup>3</sup>
+    </div>
+
+    <p>
+      with <i>&alpha;</i> =
+      <span class="sum"><span class="sop">&#8721;</span><span class="slim"><i>i</i></span></span>
+      <i>u<sub>i</sub></i>&thinsp;(<i>F<sub>i</sub></i> + <i>L<sub>i</sub></i>),
+      <i>&beta;</i> =
+      <span class="frac fr-s"><span class="num">1</span><span class="den">2</span></span>
+      <i>H</i>[<i>u</i>,<i>u</i>] and <i>&gamma;</i> =
+      <span class="frac fr-s"><span class="num">1</span><span class="den">6</span></span>
+      <i>C</i>[<i>u</i>,<i>u</i>,<i>u</i>]. Writing
+      <i>p</i><sub>1</sub> = &#8214;<i>&alpha;</i>&#8214;,
+      <i>p</i><sub>2</sub> = &#8214;<i>&beta;</i>&#8214; and
+      <i>p</i><sub>3</sub> = &#8214;<i>&gamma;</i>&#8214;, the
+      <em>radius of validity</em> is the positive root of
+      <i>p</i><sub>2</sub><i>r</i><sup>2</sup> +
+      <i>p</i><sub>3</sub><i>r</i><sup>3</sup> =
+      <i>p</i><sub>1</sub><i>r</i>,
+    </p>
+
+    <div class="eq">
+      <i>r</i><sup>*</sup> =
+      <span class="frac"><span class="num">&minus;<i>p</i><sub>2</sub> + &radic;<span class="rad"><i>p</i><sub>2</sub><sup>2</sup> + 4<i>p</i><sub>1</sub><i>p</i><sub>3</sub></span></span><span class="den">2<i>p</i><sub>3</sub></span></span>
+    </div>
+
+    <p>
+      past which the nonlinear terms can be as large as the linear one.
+      Inside <i>r</i><sup>*</sup> any number of further candidate actions
+      can be simulated from the current state; outside it, a new chart
+      has to be extracted. The whole quantity costs six evaluations of
+      the correction head and no rendering. It is a property of the
+      <em>student</em> alone, with no generator and no ground-truth
+      frame anywhere in it, so it is available per state at inference
+      time.
+    </p>
+    <p>
+      On BridgeData&nbsp;V2 we check it against real held-out frames
+      with no generator in the loop. 99% of single-step transitions and
+      67% of four-step ones fall inside <i>r</i><sup>*</sup>, and the
+      chart stops beating the do-nothing baseline at
+      1.89&thinsp;<i>r</i><sup>*</sup>. Repeating the whole measurement
+      on a second chart built from a different generator, with nearly
+      orthogonal tangent fields and translation gains a factor of ten
+      apart, puts the crossing at 2.04&thinsp;<i>r</i><sup>*</sup>. The
+      two agree about where they stop working to within 18%.
+    </p>
+  </div>
+
+  <!-- EDIT ME (optional): a validity-radius figure. Drop a PNG at
+       static/images/fig_radius.png and uncomment the block below.
+  <figure class="media">
+    <img class="ph-img" src="static/images/fig_radius.png"
+         alt="Validity radius measured against real frames">
+    <figcaption>
+      The radius measured against real frames, no generator in the loop.
+    </figcaption>
+  </figure>
+  -->
+</section>
+
+
+<!-- ================================================================ -->
+<!-- SPEED                                                            -->
+<!-- ================================================================ -->
+<section class="wrap section" id="speed">
+  <h2>One extraction, any number of candidates</h2>
+
+  <div class="prose">
+    <p>
+      Screening candidate actions with a world model has one shape:
+      every candidate costs a full forward simulation. An action jet
+      pays two network evaluations per state <em>regardless of <i>K</i></em>,
+      because the action never enters the network. Sixteen candidates
+      cost 1.4&times; one and sixty-four cost 3.1&times;, so the cost
+      per candidate <em>falls</em> as breadth grows. Ranking happens in
+      latent space, so the decoder runs once rather than <i>K</i> times.
+    </p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>world model</th>
+          <th>NFE / state</th>
+          <th><i>K</i>=1</th>
+          <th>16</th>
+          <th>64</th>
+          <th>ms / cand</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>IRASim</td><td>25<i>K</i></td><td>5478</td><td>91431</td><td>&mdash;</td><td>5478</td></tr>
+        <tr><td>WorldGym</td><td>40<i>K</i></td><td>1240</td><td>17501</td><td>&mdash;</td><td>1094</td></tr>
+        <tr class="rule"><td>Action Jet, composed</td><td>8</td><td>87.8</td><td>604.3</td><td>2347.9</td><td>36.7</td></tr>
+        <tr class="best"><td>Action Jet, single</td><td><b>2</b></td><td><b>37.9</b></td><td><b>54.0</b></td><td><b>117.5</b></td><td><b>1.8</b></td></tr>
+      </tbody>
+    </table>
+    <p class="tcap">
+      Measured cost in milliseconds of evaluating <i>K</i> candidate
+      four-step futures at one state, identical hardware.
+    </p>
+  </div>
+
+  <!-- EDIT ME: candidate fan-out videos, one per episode, side by side.
+       Add or remove <figure> blocks freely; the grid reflows. -->
+  <div class="gallery gallery-3">
+    <figure class="media">
+      <video class="ph-video" autoplay loop muted playsinline>
+        <source src="static/videos/fanout_1.mp4" type="video/mp4"></video>
+    </figure>
+    <figure class="media">
+      <video class="ph-video" autoplay loop muted playsinline>
+        <source src="static/videos/fanout_2.mp4" type="video/mp4"></video>
+    </figure>
+    <figure class="media">
+      <video class="ph-video" autoplay loop muted playsinline>
+        <source src="static/videos/fanout_3.mp4" type="video/mp4"></video>
+    </figure>
+  </div>
+  <p class="tcap">
+    <b>Breadth search on three held-out robot states.</b> A
+    goal-conditioned policy proposes candidate action chunks; the action
+    jet predicts every outcome from a single extraction, and the
+    selector keeps the one whose predicted future is closest to the
+    target.
+  </p>
+
+  <h3>More accurate than the generator it came from</h3>
+  <div class="prose">
+    <p>
+      Only the first order comes from the generator, so the student is
+      not capped by it. On held-out BridgeData&nbsp;V2 validation
+      episodes the chart predicts the next frame better than IRASim, the
+      generator that supplied its tangent, and is level at gap&nbsp;2.
+      From gap&nbsp;3 IRASim leads by about 1&thinsp;dB, which is the cost
+      of composing steps.
+    </p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th rowspan="2">world model</th><th colspan="4">PSNR&nbsp;&uarr;</th><th colspan="4">LPIPS&nbsp;&darr;</th></tr>
+        <tr><th>1</th><th>2</th><th>3</th><th>4</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>copy-frame (control)</td><td>24.48</td><td>21.48</td><td>20.04</td><td>19.19</td><td><b>.051</b></td><td><b>.084</b></td><td><b>.105</b></td><td><b>.121</b></td></tr>
+        <tr><td>WorldGym</td><td>23.80</td><td>21.10</td><td>19.70</td><td>18.86</td><td>.059</td><td>.093</td><td>.118</td><td>.137</td></tr>
+        <tr><td>IRASim (source generator)</td><td>23.34</td><td>22.37</td><td><b>21.64</b></td><td><b>21.12</b></td><td>.101</td><td>.116</td><td>.127</td><td>.136</td></tr>
+        <tr class="rule"><td>Action Jet</td><td>24.21</td><td>22.07</td><td>20.67</td><td>19.67</td><td>.074</td><td>.110</td><td>.144</td><td>.177</td></tr>
+        <tr class="best"><td>&nbsp;&nbsp;+ fine-tuned decoder</td><td><b>24.57</b></td><td><b>22.42</b></td><td>21.07</td><td>20.11</td><td>.073</td><td>.111</td><td>.143</td><td>.170</td></tr>
+      </tbody>
+    </table>
+    <p class="tcap">
+      Open-loop rollouts on BridgeData&nbsp;V2 validation episodes under
+      the recorded actions. The copy-frame control leads LPIPS because
+      consecutive Bridge frames barely differ, which is why the radius
+      measurement scores against that control explicitly.
+    </p>
+  </div>
+
+  <!-- EDIT ME: Bridge qualitative rollout figures (PNG). -->
+  <div class="gallery gallery-2">
+    <figure class="media">
+      <img class="ph-img" src="static/images/bridge_rollout_1.png"
+           alt="Held-out Bridge rollout">
+      <figcaption>Held-out rollout under the recorded actions.</figcaption>
+    </figure>
+    <figure class="media">
+      <img class="ph-img" src="static/images/bridge_rollout_2.png"
+           alt="Held-out Bridge rollout">
+      <figcaption>Held-out rollout under the recorded actions.</figcaption>
+    </figure>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- MANIFOLD                                                         -->
+<!-- ================================================================ -->
+<section class="wrap section" id="manifold">
+  <h2>Two generators, one manifold</h2>
+
+  <div class="prose">
+    <p>
+      An extracted chart could describe the dataset's manifold or only
+      the generator we probed. The comparison that separates them is
+      well posed because of where supervision enters: the geometry
+      encoder sees <em>only</em> generator probes, so the tangent field
+      is the one part of the model that the objection &ldquo;both were
+      trained on the same real frames&rdquo; cannot reach.
+    </p>
+    <p>
+      On DL3DV, two charts distilled from architecturally unrelated
+      novel-view generators &mdash; DepthSplat, explicit Gaussian
+      splatting on estimated depth, and LagerNVS, a transformer
+      initialised from VGGT &mdash; agree at mean per-axis cosine
+      <b>0.80</b> against a state-permutation null of 0.00. Their
+      generators agree at 0.75, and because both generators are
+      deterministic that 0.75 is an unattenuated ceiling rather than a
+      noise-limited one. <b>On four of six axes the students agree with
+      each other more than their generators do.</b>
+    </p>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr><th></th><th><i>t<sub>x</sub></i></th><th><i>t<sub>y</sub></i></th><th><i>t<sub>z</sub></i></th><th><i>r<sub>x</sub></i></th><th><i>r<sub>y</sub></i></th><th><i>r<sub>z</sub></i></th><th>mean</th></tr>
+      </thead>
+      <tbody>
+        <tr class="grouprow"><td colspan="8">DL3DV &mdash; DepthSplat and LagerNVS, deterministic generators</td></tr>
+        <tr class="best"><td>students</td><td>.77</td><td>.81</td><td>.77</td><td>.84</td><td>.82</td><td>.79</td><td><b>.80</b></td></tr>
+        <tr><td>teachers</td><td>.72</td><td>.73</td><td>.68</td><td>.69</td><td>.84</td><td>.86</td><td>.75</td></tr>
+        <tr><td>permutation null</td><td>.00</td><td>.00</td><td>.00</td><td>.00</td><td>.00</td><td>.00</td><td>.00</td></tr>
+        <tr class="grouprow"><td colspan="8">BridgeData&nbsp;V2 &mdash; IRASim and WorldGym</td></tr>
+        <tr><td>students</td><td>&minus;.02</td><td>.06</td><td>.08</td><td>&minus;.09</td><td>.09</td><td>.12</td><td>.04</td></tr>
+        <tr><td>teachers</td><td>&minus;.02</td><td>.03</td><td>.05</td><td>&minus;.04</td><td>.04</td><td>.05</td><td>.02</td></tr>
+      </tbody>
+    </table>
+    <p class="tcap">
+      Tangent agreement between charts built from different generators.
+      Where the generators agree, the students recover the shared
+      structure and agree at least as well. Where the generators
+      disagree, on Bridge, the students inherit the disagreement rather
+      than manufacturing consensus &mdash; which is what makes the DL3DV
+      result evidence about the data rather than about shared
+      architecture.
+    </p>
+  </div>
+
+  <!-- EDIT ME (optional): a DL3DV qualitative / reprojection figure.
+       Drop a PNG at static/images/fig_nvs_qual.png and uncomment.
+  <figure class="media">
+    <img class="ph-img" src="static/images/fig_nvs_qual.png"
+         alt="DL3DV predictions and geometric consistency">
+    <figcaption>
+      <b>Geometric consistency on DL3DV.</b> Each prediction is paired
+      with the real photograph at the same target pose; MASt3R matches
+      the pair and PnP recovers the relative camera, whose ground truth
+      is the identity. A model can win LPIPS by predicting nothing; it
+      cannot win this.
+    </figcaption>
+  </figure>
+  -->
+</section>
+
+
+<!-- ================================================================ -->
+<!-- SWEEPS                                                           -->
+<!-- ================================================================ -->
+<section class="wrap section" id="sweeps">
+  <h2>Tracing the manifold</h2>
+
+  <div class="prose">
+    <p>
+      Each clip below walks the demonstrated action out from one
+      extracted chart, on a different held-out episode. The surfaces are
+      measured patches of <i>M<sub>x</sub></i>, four tangent pairs at
+      once: the flat grey sheet is the first-order chart alone, the
+      coloured sheet adds the correction head, and the marker tracks the
+      current step. The frames beside them are decoded from that same
+      single extraction. No network is re-run anywhere in the sweep.
+    </p>
+  </div>
+
+  <!-- ==============================================================
+       EDIT ME: sweep videos, one per episode, in a 2x2 grid.
+       These are slide_videos.py's gt.mp4 output for four different
+       episodes, renamed gt_1 .. gt_4. Add or remove <figure> blocks
+       freely -- the grid reflows on its own.
+       ============================================================== -->
+  <div class="gallery gallery-2">
+    <figure class="media">
+      <video class="ph-video" autoplay loop muted playsinline>
+        <source src="static/videos/gt_1.mp4" type="video/mp4"></video>
+      <figcaption>Episode 1</figcaption>
+    </figure>
+    <figure class="media">
+      <video class="ph-video" autoplay loop muted playsinline>
+        <source src="static/videos/gt_2.mp4" type="video/mp4"></video>
+      <figcaption>Episode 2</figcaption>
+    </figure>
+    <figure class="media">
+      <video class="ph-video" autoplay loop muted playsinline>
+        <source src="static/videos/gt_3.mp4" type="video/mp4"></video>
+      <figcaption>Episode 3</figcaption>
+    </figure>
+    <figure class="media">
+      <video class="ph-video" autoplay loop muted playsinline>
+        <source src="static/videos/gt_4.mp4" type="video/mp4"></video>
+      <figcaption>Episode 4</figcaption>
+    </figure>
+  </div>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- BIBTEX                                                           -->
+<!-- ================================================================ -->
+<section class="wrap section" id="bibtex">
+  <h2>BibTeX</h2>
+  <!-- EDIT ME: paste the citation between the <code> tags. It is left
+       empty on purpose. -->
+  <pre class="bib"><code></code></pre>
+</section>
+
+
+<!-- ================================================================ -->
+<!-- FOOTER                                                           -->
+<!-- ================================================================ -->
+<footer class="footer">
+  <div class="wrap">
+    <p>
+      Website template adapted from
+      <a href="https://nerfies.github.io">Nerfies</a>, released under a
+      <a href="http://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>
+      license.
+    </p>
+    <p><a href="#top">Back to top &uarr;</a></p>
+  </div>
+</footer>
+
+<script src="static/js/main.js"></script>
+</body>
+</html>

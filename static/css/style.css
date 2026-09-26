@@ -1,0 +1,436 @@
+/* =====================================================================
+   Action Jets -- project page
+   One stylesheet, no framework. Edit the tokens below to retheme.
+   ===================================================================== */
+
+:root {
+  --ink:     #0b0b0b;
+  --ink2:    #52514e;
+  --muted:   #8f8d87;
+  --rule:    #e6e5e1;
+  --card:    #f7f6f3;
+  --bg:      #ffffff;
+  --accent:  #2a78d6;
+  --accent2: #eb6834;
+
+  --serif: "Newsreader", Georgia, "Times New Roman", serif;
+  --sans:  "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI",
+           Roboto, Helvetica, Arial, sans-serif;
+  --mono:  "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo,
+           Consolas, monospace;
+
+  --maxw: 880px;
+  --gut:  20px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink: #f2f1ee; --ink2: #b8b6b0; --muted: #86847e;
+    --rule: #2b2b2e; --card: #16161a; --bg: #0d0d10;
+    --accent: #6ba6f0; --accent2: #f28a5e;
+  }
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.wrap {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 var(--gut);
+}
+
+.section { padding: 46px 0 8px; }
+.section-teaser { padding-top: 10px; }
+
+h2 {
+  font-family: var(--serif);
+  font-size: 30px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  margin: 0 0 18px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+h3 {
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 600;
+  margin: 38px 0 12px;
+}
+
+.prose p { margin: 0 0 16px; }
+.prose em { font-style: italic; }
+
+/* ------------------------------------------------------------- nav */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(180%) blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+.nav-inner {
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 var(--gut);
+  height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+.nav-brand {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.nav-links {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin-left: auto;
+}
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-links a {
+  font-size: 13.5px;
+  color: var(--ink2);
+  white-space: nowrap;
+  padding: 4px 0;
+  border-bottom: 2px solid transparent;
+}
+.nav-links a:hover { color: var(--ink); text-decoration: none; }
+.nav-links a.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+/* ------------------------------------------------------------ hero */
+.hero {
+  text-align: center;
+  padding: 56px 0 8px;
+  border-bottom: 1px solid var(--rule);
+}
+.venue {
+  font-size: 12.5px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.title {
+  font-family: var(--serif);
+  font-weight: 600;
+  font-size: clamp(30px, 5.2vw, 46px);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  margin: 0 0 22px;
+}
+.title-sep { color: var(--muted); }
+.subtitle {
+  display: block;
+  font-size: 0.62em;
+  font-weight: 400;
+  color: var(--ink2);
+  margin-top: 10px;
+  line-height: 1.3;
+}
+.authors {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+  justify-content: center;
+  font-size: 17px;
+}
+.authors a { color: var(--ink); }
+.affil {
+  margin: 0 0 26px;
+  color: var(--ink2);
+  font-size: 15px;
+}
+
+.btns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  padding-bottom: 34px;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 14.5px;
+  font-weight: 500;
+  border: 1px solid var(--ink);
+  transition: transform .12s ease, opacity .12s ease;
+}
+.btn:hover { text-decoration: none; transform: translateY(-1px); opacity: .9; }
+.btn-ico { font-size: 12px; opacity: .8; }
+.btn-soon { background: transparent; color: var(--ink); border-color: var(--rule); }
+.tag {
+  font-size: 11px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-left: 1px solid var(--rule);
+  padding-left: 8px;
+  margin-left: 2px;
+}
+
+/* ----------------------------------------------------------- stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1px;
+  background: var(--rule);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.stat { background: var(--bg); padding: 20px 18px; }
+.stat-n {
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.stat-u { font-size: 0.5em; color: var(--muted); margin-left: 2px; }
+.stat-l {
+  margin-top: 10px;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--ink2);
+}
+
+/* ----------------------------------------------------------- media */
+.media { margin: 26px 0 30px; }
+.media img, .media video {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+}
+figcaption {
+  margin-top: 11px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--ink2);
+}
+figcaption b { color: var(--ink); }
+
+.gallery {
+  display: grid;
+  gap: 18px;
+  margin: 26px 0 30px;
+}
+.gallery-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.gallery-3 { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.gallery .media { margin: 0; }
+.gallery figcaption { font-size: 13px; margin-top: 8px; }
+
+/* placeholder shown when a figure/video file is not there yet */
+.ph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  aspect-ratio: 16 / 9;
+  max-height: 320px;
+  border: 1.5px dashed var(--rule);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--muted);
+  text-align: center;
+  padding: 16px;
+}
+.ph-title { font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+.ph-path { font-family: var(--mono); font-size: 11.5px; word-break: break-all; }
+
+/* ---------------------------------------------------------- tables */
+.tablewrap { margin: 24px 0 30px; overflow-x: auto; }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+th, td {
+  padding: 8px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--rule);
+  white-space: nowrap;
+}
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  font-weight: 600;
+  font-size: 12.5px;
+  color: var(--ink2);
+  border-bottom: 1.5px solid var(--ink2);
+}
+tbody tr.rule td { border-top: 1px solid var(--ink2); }
+tbody tr.best td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+tr.grouprow td {
+  text-align: left;
+  font-size: 12.5px;
+  color: var(--muted);
+  font-style: italic;
+  padding-top: 14px;
+  border-bottom: none;
+}
+.tcap { font-size: 13.5px; color: var(--ink2); margin: 12px 0 0; line-height: 1.55; }
+
+/* ----------------------------------------------------------- misc */
+.more {
+  margin: 8px 0 24px;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 0 16px;
+}
+.more[open] { padding-bottom: 8px; }
+.more summary {
+  cursor: pointer;
+  padding: 13px 0;
+  font-size: 14.5px;
+  font-weight: 500;
+  list-style: none;
+}
+.more summary::-webkit-details-marker { display: none; }
+.more summary::before { content: "＋  "; color: var(--muted); }
+.more[open] summary::before { content: "－  "; }
+
+.bib {
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  padding: 18px;
+  overflow-x: auto;
+  min-height: 92px;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre;
+  color: var(--ink2);
+  margin: 0;
+}
+
+.footer {
+  margin-top: 56px;
+  padding: 28px 0 44px;
+  border-top: 1px solid var(--rule);
+  font-size: 13.5px;
+  color: var(--muted);
+  text-align: center;
+}
+.footer p { margin: 5px 0; }
+
+mjx-container { overflow-x: auto; overflow-y: hidden; max-width: 100%; }
+
+@media (max-width: 640px) {
+  body { font-size: 16px; }
+  .section { padding: 34px 0 4px; }
+  h2 { font-size: 25px; }
+  .nav-brand { display: none; }
+  .nav-links { margin-left: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { transition: none !important; }
+}
+
+/* ------------------------------------------------- equations (no CDN) */
+.eq {
+  font-family: var(--serif);
+  font-size: 20px;
+  text-align: center;
+  margin: 22px 0 22px;
+  padding: 14px 10px;
+  background: var(--card);
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+.eq i { font-style: italic; }
+.frac {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+.frac .num { padding: 0 6px 2px; border-bottom: 1.2px solid currentColor; }
+.frac .den { padding: 2px 6px 0; }
+.rad { border-top: 1.1px solid currentColor; padding: 0 2px 0 1px; margin-left: -1px; }
+.btn-ico { width: 15px; height: 15px; opacity: .85; flex: 0 0 auto; }
+
+/* a small inline fraction, for the 1/2 and 1/6 coefficients */
+.frac.fr-s { font-size: .68em; margin: 0 .12em; }
+
+/* summation sign with limits under (and optionally over) it */
+.sum {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  /* middle, not baseline: a column flex box takes its baseline from its
+     FIRST row, so with an upper limit present a baseline alignment drops
+     the whole sigma below the line. */
+  vertical-align: middle;
+  line-height: 1;
+  margin: 0 .16em;
+}
+.sum .sop  { font-size: 1.45em; line-height: .88; font-family: var(--serif); }
+.sum .slim,
+.sum .supl { font-size: .54em; line-height: 1.3; font-style: normal; }
+.sum .slim i, .sum .supl i { font-style: italic; }
+
+/* accents: <span class="hat">z</span>, <span class="tld">r</span> */
+.hat, .tld { position: relative; display: inline-block; }
+.hat::after, .tld::after {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-style: normal;
+  font-size: .78em;
+  line-height: 1;
+  pointer-events: none;
+}
+.hat::after { content: "\02C6"; top: .18em; }
+.tld::after { content: "\02DC"; top: .12em; }
+
+/* an equation is a scroll container on narrow screens, never an overflow */
+.eq { font-variant-numeric: lining-nums; }
+@media (max-width: 640px) {
+  .eq { font-size: 17px; padding: 12px 8px; }
+}
